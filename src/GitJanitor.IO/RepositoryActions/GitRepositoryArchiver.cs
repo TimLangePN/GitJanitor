@@ -1,4 +1,4 @@
-﻿namespace GitJanitor.IO.Operations
+﻿namespace GitJanitor.IO.RepositoryActions
 {
     public class GitRepositoryArchiver
     {
