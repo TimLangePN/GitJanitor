@@ -1,8 +1,9 @@
-﻿using GitJanitor.Core.Interfaces;
-using GitJanitor.Core.Models;
-using Microsoft.Extensions.Logging;
-using System.IO;
+﻿using GitJanitor.Core.Extensions;
 using GitJanitor.Core.Handlers;
+using GitJanitor.Core.Interfaces;
+using GitJanitor.Core.Models;
+using LibGit2Sharp;
+using Microsoft.Extensions.Logging;
 
 public class GitRepositoryScanner : IGitRepositoryScanner
 {
@@ -13,11 +14,11 @@ public class GitRepositoryScanner : IGitRepositoryScanner
         _logger = logger;
     }
 
-    public async Task<List<GitRepository>> ScanForRepositoriesAsync(string path, string? organization)
+    public async Task<List<Repository>> ScanForRepositoriesAsync(string path, string? organization)
     {
         _logger.LogInformation("Starting directory scan...");
 
-        var gitRepositories = new List<GitRepository>();
+        var gitRepositories = new List<Repository>();
 
         // Check if the directory exists before starting the search.
         if (Directory.Exists(path))
@@ -28,7 +29,7 @@ public class GitRepositoryScanner : IGitRepositoryScanner
         return gitRepositories;
     }
 
-    private async Task ScanDirectoryRecursivelyAsync(DirectoryInfo directory, List<GitRepository> gitRepositories, string organization)
+    private async Task ScanDirectoryRecursivelyAsync(DirectoryInfo directory, List<Repository> gitRepositories, string organization)
     {
         var tasks = new List<Task>();
 
@@ -38,8 +39,13 @@ public class GitRepositoryScanner : IGitRepositoryScanner
             {
                 try
                 {
-                    var repositoryOrganizationString = OrganizationHandler.GetOrganization(directory.ToString(), organization);
-                    gitRepositories.Add(new GitRepository { Path = directory.FullName, Name = directory.Name, Owner = repositoryOrganizationString});
+                    var repository = new Repository(directory.FullName);
+                    var repositoryOrganization = OrganizationHandler.GetOrganization(directory.FullName, organization);
+
+                    if (string.Equals(repositoryOrganization, organization, StringComparison.OrdinalIgnoreCase))
+                    {
+                        gitRepositories.Add(repository);
+                    }
                 }
                 catch (Exception e)
                 {

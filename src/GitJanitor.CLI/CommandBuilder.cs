@@ -1,6 +1,8 @@
 ﻿using System.CommandLine;
 using GitJanitor.CLI.Enums;
+using GitJanitor.Core.Extensions;
 using GitJanitor.Core.Interfaces;
+using LibGit2Sharp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -45,9 +47,12 @@ namespace GitJanitor.CLI
 
                     foreach (var repository in repositories)
                     {
-                        Console.WriteLine($"Name: {repository.Name} Path: {repository.Path} Owner: {repository.Owner}");
+                        var remote = repository.Network.Remotes["origin"];
+                        if (remote != null)
+                        {
+                            Console.WriteLine($"{repository.GetRepositoryName()} {remote.Url}");
+                        }
                     }
-
                 },
                 pathOption, actionOption, organizationOption);
             

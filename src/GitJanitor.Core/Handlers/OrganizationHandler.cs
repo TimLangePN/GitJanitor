@@ -13,7 +13,7 @@ namespace GitJanitor.Core.Handlers
             // Add other platforms as needed
         };
 
-        public static string GetOrganization(string path, string organizationInput)
+        public static string? GetOrganization(string path, string organizationInput)
         {
 
             using var repo = new Repository(path);
@@ -35,7 +35,10 @@ namespace GitJanitor.Core.Handlers
                     }
                 }
 
-                return organizationInput;
+                if (url.Contains(organizationInput))
+                {
+                    return organizationInput;
+                }
 
             }
             throw new Exception($"{url}, seems to not point to a valid git repository");
