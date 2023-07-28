@@ -2,7 +2,7 @@
   "profiles": {
     "GitJanitor.CLI": {
       "commandName": "Project",
-      "commandLineArgs": "--action Delete\r\n--path C:\\projects\\\r\n--organization parkmobile"
+      "commandLineArgs": "--action Delete\r\n--path C:\\\r\n--organization parkmobile"
     }
   }
 }

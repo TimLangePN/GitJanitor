@@ -33,32 +33,43 @@ public class GitRepositoryScanner : IGitRepositoryScanner
     {
         var tasks = new List<Task>();
 
-        foreach (var subdirectory in directory.EnumerateDirectories())
+        try
         {
-            if (subdirectory.Name == ".git")
+            foreach (var subdirectory in directory.EnumerateDirectories())
             {
-                try
+                if (subdirectory.Name == ".git")
                 {
-                    var repository = new Repository(directory.FullName);
-                    var repositoryOrganization = OrganizationHandler.GetOrganization(directory.FullName, organization);
-
-                    if (string.Equals(repositoryOrganization, organization, StringComparison.OrdinalIgnoreCase))
+                    try
                     {
-                        gitRepositories.Add(repository);
+                        var repository = new Repository(directory.FullName);
+                        var repositoryOrganization = OrganizationHandler.GetOrganization(directory.FullName, organization);
+
+                        if (string.Equals(repositoryOrganization, organization, StringComparison.OrdinalIgnoreCase))
+                        {
+                            gitRepositories.Add(repository);
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex.Message);
+                    }
+                    // This directory is a Git repository, add it to the list.
+                    // GitRepository is your custom class. Replace with your actual implementation.
                 }
-                catch (Exception e)
+                else
                 {
-                    _logger.LogWarning(e.Message);
+                    // This directory is not a Git repository, search its subdirectories.
+                    tasks.Add(ScanDirectoryRecursivelyAsync(subdirectory, gitRepositories, organization));
                 }
-                // This directory is a Git repository, add it to the list.
-                // GitRepository is your custom class. Replace with your actual implementation.
             }
-            else
-            {
-                // This directory is not a Git repository, search its subdirectories.
-                tasks.Add(ScanDirectoryRecursivelyAsync(subdirectory, gitRepositories, organization));
-            }
+        }
+        catch (UnauthorizedAccessException uae)
+        {
+            _logger.LogWarning($"Access denied to directory: {directory.FullName}. Skipping this directory. Exception: {uae.Message}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred while processing directory: {directory.FullName}. Exception: {ex.Message}");
         }
 
         // Await all tasks (i.e., searching all subdirectories) to complete.
