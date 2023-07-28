@@ -1,10 +1,9 @@
-﻿using GitJanitor.Core.Extensions;
-using GitJanitor.Core.Handlers;
+﻿using GitJanitor.Core.Handlers;
 using GitJanitor.Core.Interfaces;
-using GitJanitor.Core.Models;
 using LibGit2Sharp;
 using Microsoft.Extensions.Logging;
 
+namespace GitJanitor.Core;
 public class GitRepositoryScanner : IGitRepositoryScanner
 {
     private readonly ILogger _logger;

@@ -1,8 +1,6 @@
-﻿using System;
-
-public class Class1
+﻿namespace GitJanitor.IO.RepositoryActions
 {
-	public Class1()
-	{
-	}
+    public class GitRepositoryMover
+    {
+    }
 }

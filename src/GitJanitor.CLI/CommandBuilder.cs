@@ -25,6 +25,10 @@ namespace GitJanitor.CLI
                 aliases: new string[] { "--organization", "-o" },
                 description: "The GitHub organization to filter repositories by.");
 
+            var targetDirOption = new Option<string>(
+                aliases: new string[] { "--target", "-o" },
+                description: "The target directory to move/archive the repositories to.");
+
             var rootCommand = new RootCommand
             {
                 Description = "GitJanitor - A CLI tool for cleaning up Git repositories.",
@@ -34,6 +38,7 @@ namespace GitJanitor.CLI
             rootCommand.Add(pathOption);
             rootCommand.Add(actionOption);
             rootCommand.Add(organizationOption);
+            rootCommand.Add(targetDirOption);
 
             rootCommand.SetHandler(async (pathOptionValue, actionOptionValue, organizationOptionValue) =>
                 {

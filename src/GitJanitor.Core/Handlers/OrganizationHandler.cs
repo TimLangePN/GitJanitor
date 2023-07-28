@@ -5,7 +5,7 @@ namespace GitJanitor.Core.Handlers
 {
     public class OrganizationHandler
     {
-        private static Dictionary<string, string> platforms = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> Platforms = new Dictionary<string, string>
         {
             { "github.com", @"github\.com[:/](.+?)/" },
             { "bitbucket.org", @"bitbucket\.org[:/](.+?)/" },
@@ -24,7 +24,7 @@ namespace GitJanitor.Core.Handlers
             // Get the URL
             var url = remote.Url;
 
-            foreach (var platform in platforms)
+            foreach (var platform in Platforms)
             {
                 if (url.Contains(platform.Key))
                 {

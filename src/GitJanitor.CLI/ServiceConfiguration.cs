@@ -1,4 +1,5 @@
-﻿using GitJanitor.Core.Interfaces;
+﻿using GitJanitor.Core;
+using GitJanitor.Core.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

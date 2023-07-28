@@ -1,5 +1,4 @@
-﻿using GitJanitor.Core.Models;
-using LibGit2Sharp;
+﻿using LibGit2Sharp;
 
 namespace GitJanitor.Core.Interfaces;
 public interface IGitRepositoryScanner
