@@ -1,9 +1,8 @@
-﻿namespace GitJanitor.Common.Enums
+﻿namespace GitJanitor.Common.Enums;
+
+public enum GitRepositoryAction
 {
-    public enum GitRepositoryAction
-    {
-        Archive,
-        Delete,
-        Move
-    }
+    Archive,
+    Delete,
+    Move
 }

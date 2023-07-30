@@ -4,62 +4,64 @@ using GitJanitor.Common.Models;
 using GitJanitor.Core.Interfaces;
 using GitJanitor.IO.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-namespace GitJanitor.CLI
+namespace GitJanitor.CLI;
+
+public class CommandBuilder
 {
-    public class CommandBuilder
+    public RootCommand BuildCommandLineApplication(IServiceProvider services)
     {
-        public RootCommand BuildCommandLineApplication(IServiceProvider services)
+        // Create flag options
+        var workingDirOption = new Option<string>(
+            new[] { "--path", "-p" },
+            "The workingDir to scan for Git repositories.");
+
+        var actionOption = new Option<GitRepositoryAction>(
+            new[] { "--action", "-a" },
+            "The action to perform on the found repositories.");
+
+        var organizationOption = new Option<string>(
+            new[] { "--organization", "-o" },
+            "The GitHub organization to filter repositories by.");
+
+        var targetDirOption = new Option<string>(
+            new[] { "--target", "-t" },
+            "The target directory to move/archive the repositories to.");
+
+        var rootCommand = new RootCommand
         {
-            // Create flag options
-            var workingDirOption = new Option<string>(
-                aliases: new string[] { "--workingDir", "-p" },
-                description: "The workingDir to scan for Git repositories.");
+            Description = "GitJanitor - A CLI tool for cleaning up Git repositories."
+        };
 
-            var actionOption = new Option<GitRepositoryAction>(
-                aliases: new string[] { "--action", "-a" },
-                description: "The action to perform on the found repositories.");
+        // Add the rootCommand options
+        rootCommand.Add(workingDirOption);
+        rootCommand.Add(actionOption);
+        rootCommand.Add(organizationOption);
+        rootCommand.Add(targetDirOption);
 
-            var organizationOption = new Option<string>(
-                aliases: new string[] { "--organization", "-o" },
-                description: "The GitHub organization to filter repositories by.");
-
-            var targetDirOption = new Option<string>(
-                aliases: new string[] { "--target", "-t" },
-                description: "The target directory to move/archive the repositories to.");
-
-            var rootCommand = new RootCommand
+        rootCommand.SetHandler(
+            async (workingDirOptionValue, actionOptionValue, organizationOptionValue, targetDirOptionValue) =>
             {
-                Description = "GitJanitor - A CLI tool for cleaning up Git repositories.",
-            };
+                var dirScanner = services.GetRequiredService<IGitRepositoryScanner>();
+                var dirHandler = services.GetRequiredService<IGitRepositoryHandler>();
 
-            // Add the rootCommand options
-            rootCommand.Add(workingDirOption);
-            rootCommand.Add(actionOption);
-            rootCommand.Add(organizationOption);
-            rootCommand.Add(targetDirOption);
-
-            rootCommand.SetHandler(async (workingDirOptionValue, actionOptionValue, organizationOptionValue, targetDirOptionValue) =>
+                // Bind the rootCommands to the CommandLineFlags model and apply some validation on it
+                var flags = new CommandLineFlags
                 {
-                    //var logger = services.GetRequiredService<ILogger<Program>>();
-                    var dirScanner = services.GetRequiredService<IGitRepositoryScanner>();
-                    var dirHandler = services.GetRequiredService<IGitRepositoryHandler>();
+                    WorkingDirectory = workingDirOptionValue,
+                    Action = actionOptionValue,
+                    Organization = organizationOptionValue,
+                    TargetDirectory = targetDirOptionValue
+                };
 
-                    // Bind the rootCommands to the CommandLineFlags model and apply some validation on it
-                    var flags = new CommandLineFlags
-                    {
-                        WorkingDirectory = workingDirOptionValue,
-                        Action = actionOptionValue,
-                        Organization = organizationOptionValue,
-                        TargetDirectory = targetDirOptionValue
-                    };
+                var repositories =
+                    await dirScanner.ScanForRepositoriesAsync(flags.WorkingDirectory, flags.Organization);
 
-                    var repositories = await dirScanner.ScanForRepositoriesAsync(flags.WorkingDirectory, flags.Organization);
+                await dirHandler.HandleAsync(repositories, flags);
+            },
+            workingDirOption, actionOption, organizationOption, targetDirOption);
 
-                },
-                workingDirOption, actionOption, organizationOption, targetDirOption);
-            
-            return rootCommand;
-        }
+        return rootCommand;
     }
 }
