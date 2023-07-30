@@ -9,7 +9,7 @@ public class CommandLineFlags
 
     [Required] public GitRepositoryAction Action { get; set; }
 
-    [StringLength(256)] public string? Organization { get; set; }
+    [StringLength(256)] public string? Owner { get; set; }
 
     [StringLength(256)] public string? TargetDirectory { get; set; }
 }

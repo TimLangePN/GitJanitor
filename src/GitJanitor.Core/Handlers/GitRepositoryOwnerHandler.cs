@@ -3,7 +3,7 @@ using LibGit2Sharp;
 
 namespace GitJanitor.Core.Handlers;
 
-public class OrganizationHandler
+public class GitRepositoryOwnerHandler
 {
     private static readonly Dictionary<string, string> Platforms = new()
     {
@@ -13,7 +13,7 @@ public class OrganizationHandler
         // Add other platforms as needed
     };
 
-    public static string? GetOrganization(string path, string organizationInput)
+    public static string? Getowner(string path, string ownerInput)
     {
         using var repo = new Repository(path);
 
@@ -31,7 +31,7 @@ public class OrganizationHandler
                 if (match.Success) return match.Groups[1].Value;
             }
 
-            if (url.Contains(organizationInput)) return organizationInput;
+            if (url.Contains(ownerInput)) return ownerInput;
         }
 
         throw new Exception($"{url}, seems to not point to a valid git repository");

@@ -21,9 +21,9 @@ public class CommandBuilder
             new[] { "--action", "-a" },
             "The action to perform on the found repositories.");
 
-        var organizationOption = new Option<string>(
-            new[] { "--organization", "-o" },
-            "The GitHub organization to filter repositories by.");
+        var ownerOption = new Option<string>(
+            new[] { "--owner", "-o" },
+            "The GitHub owner to filter repositories by.");
 
         var targetDirOption = new Option<string>(
             new[] { "--target", "-t" },
@@ -37,11 +37,11 @@ public class CommandBuilder
         // Add the rootCommand options
         rootCommand.Add(workingDirOption);
         rootCommand.Add(actionOption);
-        rootCommand.Add(organizationOption);
+        rootCommand.Add(ownerOption);
         rootCommand.Add(targetDirOption);
 
         rootCommand.SetHandler(
-            async (workingDirOptionValue, actionOptionValue, organizationOptionValue, targetDirOptionValue) =>
+            async (workingDirOptionValue, actionOptionValue, ownerOptionValue, targetDirOptionValue) =>
             {
                 var dirScanner = services.GetRequiredService<IGitRepositoryScanner>();
                 var dirHandler = services.GetRequiredService<IGitRepositoryHandler>();
@@ -51,16 +51,16 @@ public class CommandBuilder
                 {
                     WorkingDirectory = workingDirOptionValue,
                     Action = actionOptionValue,
-                    Organization = organizationOptionValue,
+                    Owner = ownerOptionValue,
                     TargetDirectory = targetDirOptionValue
                 };
 
                 var repositories =
-                    await dirScanner.ScanForRepositoriesAsync(flags.WorkingDirectory, flags.Organization);
+                    await dirScanner.ScanForRepositoriesAsync(flags.WorkingDirectory, flags.Owner);
 
                 await dirHandler.HandleAsync(repositories, flags);
             },
-            workingDirOption, actionOption, organizationOption, targetDirOption);
+            workingDirOption, actionOption, ownerOption, targetDirOption);
 
         return rootCommand;
     }

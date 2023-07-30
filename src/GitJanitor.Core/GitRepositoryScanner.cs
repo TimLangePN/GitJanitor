@@ -14,7 +14,7 @@ public class GitRepositoryScanner : IGitRepositoryScanner
         _logger = logger;
     }
 
-    public async Task<List<Repository>> ScanForRepositoriesAsync(string path, string? organization)
+    public async Task<List<Repository>> ScanForRepositoriesAsync(string path, string? owner)
     {
         _logger.LogInformation("Starting directory scan...");
 
@@ -22,13 +22,13 @@ public class GitRepositoryScanner : IGitRepositoryScanner
 
         // Check if the directory exists before starting the search.
         if (Directory.Exists(path))
-            await ScanDirectoryRecursivelyAsync(new DirectoryInfo(path), gitRepositories, organization);
+            await ScanDirectoryRecursivelyAsync(new DirectoryInfo(path), gitRepositories, owner);
 
         return gitRepositories;
     }
 
     private async Task ScanDirectoryRecursivelyAsync(DirectoryInfo directory, List<Repository> gitRepositories,
-        string organization)
+        string owner)
     {
         var tasks = new List<Task>();
 
@@ -39,10 +39,10 @@ public class GitRepositoryScanner : IGitRepositoryScanner
                     try
                     {
                         var repository = new Repository(directory.FullName);
-                        var repositoryOrganization =
-                            OrganizationHandler.GetOrganization(directory.FullName, organization);
+                        var repositoryowner =
+                            GitRepositoryOwnerHandler.Getowner(directory.FullName, owner);
 
-                        if (string.Equals(repositoryOrganization, organization, StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(repositoryowner, owner, StringComparison.OrdinalIgnoreCase))
                             gitRepositories.Add(repository);
                     }
                     catch (Exception ex)
@@ -52,7 +52,7 @@ public class GitRepositoryScanner : IGitRepositoryScanner
                 // This directory is a Git repository, add it to the list.
                 else
                     // This directory is not a Git repository, search its subdirectories.
-                    tasks.Add(ScanDirectoryRecursivelyAsync(subDirectory, gitRepositories, organization));
+                    tasks.Add(ScanDirectoryRecursivelyAsync(subDirectory, gitRepositories, owner));
         }
         catch (UnauthorizedAccessException uae)
         {
