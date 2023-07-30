@@ -1,6 +1,4 @@
 ﻿using System.CommandLine;
-using GitJanitor.CLI.Enums;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace GitJanitor.CLI
 {

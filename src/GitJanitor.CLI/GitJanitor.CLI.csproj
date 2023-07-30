@@ -16,7 +16,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GitJanitor.Common\GitJanitor.Common.csproj" />
     <ProjectReference Include="..\GitJanitor.Core\GitJanitor.Core.csproj" />
+    <ProjectReference Include="..\GitJanitor.IO\GitJanitor.IO.csproj" />
   </ItemGroup>
 
 </Project>

@@ -34,9 +34,9 @@ public class GitRepositoryScanner : IGitRepositoryScanner
 
         try
         {
-            foreach (var subdirectory in directory.EnumerateDirectories())
+            foreach (var subDirectory in directory.EnumerateDirectories())
             {
-                if (subdirectory.Name == ".git")
+                if (subDirectory.Name == ".git")
                 {
                     try
                     {
@@ -53,12 +53,11 @@ public class GitRepositoryScanner : IGitRepositoryScanner
                         _logger.LogWarning(ex.Message);
                     }
                     // This directory is a Git repository, add it to the list.
-                    // GitRepository is your custom class. Replace with your actual implementation.
                 }
                 else
                 {
                     // This directory is not a Git repository, search its subdirectories.
-                    tasks.Add(ScanDirectoryRecursivelyAsync(subdirectory, gitRepositories, organization));
+                    tasks.Add(ScanDirectoryRecursivelyAsync(subDirectory, gitRepositories, organization));
                 }
             }
         }

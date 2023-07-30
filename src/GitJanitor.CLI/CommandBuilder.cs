@@ -1,10 +1,9 @@
 ﻿using System.CommandLine;
-using GitJanitor.CLI.Enums;
-using GitJanitor.Core.Extensions;
+using GitJanitor.Common.Enums;
+using GitJanitor.Common.Models;
 using GitJanitor.Core.Interfaces;
-using LibGit2Sharp;
+using GitJanitor.IO.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace GitJanitor.CLI
 {
@@ -13,11 +12,11 @@ namespace GitJanitor.CLI
         public RootCommand BuildCommandLineApplication(IServiceProvider services)
         {
             // Create flag options
-            var pathOption = new Option<string>(
-                aliases: new string[] { "--path", "-p" },
-                description: "The path to scan for Git repositories.");
+            var workingDirOption = new Option<string>(
+                aliases: new string[] { "--workingDir", "-p" },
+                description: "The workingDir to scan for Git repositories.");
 
-            var actionOption = new Option<Actions>(
+            var actionOption = new Option<GitRepositoryAction>(
                 aliases: new string[] { "--action", "-a" },
                 description: "The action to perform on the found repositories.");
 
@@ -26,7 +25,7 @@ namespace GitJanitor.CLI
                 description: "The GitHub organization to filter repositories by.");
 
             var targetDirOption = new Option<string>(
-                aliases: new string[] { "--target", "-o" },
+                aliases: new string[] { "--target", "-t" },
                 description: "The target directory to move/archive the repositories to.");
 
             var rootCommand = new RootCommand
@@ -35,31 +34,30 @@ namespace GitJanitor.CLI
             };
 
             // Add the rootCommand options
-            rootCommand.Add(pathOption);
+            rootCommand.Add(workingDirOption);
             rootCommand.Add(actionOption);
             rootCommand.Add(organizationOption);
             rootCommand.Add(targetDirOption);
 
-            rootCommand.SetHandler(async (pathOptionValue, actionOptionValue, organizationOptionValue) =>
+            rootCommand.SetHandler(async (workingDirOptionValue, actionOptionValue, organizationOptionValue, targetDirOptionValue) =>
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    //var logger = services.GetRequiredService<ILogger<Program>>();
                     var dirScanner = services.GetRequiredService<IGitRepositoryScanner>();
+                    var dirHandler = services.GetRequiredService<IGitRepositoryHandler>();
 
-                    logger.LogInformation("Processing path {pathOptionValue}, action {actionOptionValue}, and organization {organizationOptionValue}",
-                        pathOptionValue, actionOptionValue, organizationOptionValue);
-
-                    var repositories = await dirScanner.ScanForRepositoriesAsync(pathOptionValue, organizationOptionValue);
-
-                    foreach (var repository in repositories)
+                    // Bind the rootCommands to the CommandLineFlags model and apply some validation on it
+                    var flags = new CommandLineFlags
                     {
-                        var remote = repository.Network.Remotes["origin"];
-                        if (remote != null)
-                        {
-                            Console.WriteLine($"{repository.GetRepositoryName()} {remote.Url}");
-                        }
-                    }
+                        WorkingDirectory = workingDirOptionValue,
+                        Action = actionOptionValue,
+                        Organization = organizationOptionValue,
+                        TargetDirectory = targetDirOptionValue
+                    };
+
+                    var repositories = await dirScanner.ScanForRepositoriesAsync(flags.WorkingDirectory, flags.Organization);
+
                 },
-                pathOption, actionOption, organizationOption);
+                workingDirOption, actionOption, organizationOption, targetDirOption);
             
             return rootCommand;
         }
