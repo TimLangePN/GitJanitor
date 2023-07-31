@@ -3,7 +3,6 @@ using GitJanitor.Common.Enums;
 using GitJanitor.Common.Models;
 using GitJanitor.Core.Interfaces;
 using GitJanitor.IO.Interfaces;
-using LibGit2Sharp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
