@@ -5,11 +5,15 @@ namespace GitJanitor.Common.Models;
 
 public class CommandLineFlags
 {
-    [Required] [StringLength(256)] public string WorkingDirectory { get; set; }
+    [Required] [StringLength(256)] 
+    public string WorkingDirectory { get; set; }
 
-    [Required] public GitRepositoryAction Action { get; set; }
+    [Required] 
+    public GitRepositoryAction Action { get; set; }
 
-    [StringLength(256)] public string? Owner { get; set; }
+    [StringLength(256)] 
+    public string? Owner { get; set; }
 
-    [StringLength(256)] public string? TargetDirectory { get; set; }
+    [StringLength(256)] 
+    public string? TargetDirectory { get; set; }
 }
