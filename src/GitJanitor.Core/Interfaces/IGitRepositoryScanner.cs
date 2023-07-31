@@ -4,5 +4,5 @@ namespace GitJanitor.Core.Interfaces;
 
 public interface IGitRepositoryScanner
 {
-    Task<List<Repository>> ScanForRepositoriesAsync(string path, string owner);
+    Task<IList<Repository>> ScanForRepositoriesAsync(string path, string owner);
 }

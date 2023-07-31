@@ -10,26 +10,19 @@ namespace GitJanitor.IO;
 
 public class GitRepositoryHandler : IGitRepositoryHandler
 {
-    public async Task HandleAsync(List<Repository> repositories, CommandLineFlags flags)
+    public async Task HandleAsync(IList<Repository> repositories, CommandLineFlags flags)
     {
-        Func<Repository, Task> action;
-
-        switch (flags.Action)
+        Func<Repository, Task> action = flags.Action switch
         {
-            case GitRepositoryAction.Archive:
-                action = repository => ArchiveAsync(repository.Info.WorkingDirectory, flags.TargetDirectory, repository.GetRepositoryName());
-                break;
-            case GitRepositoryAction.Delete:
-                action = repository => DeleteAsync(repository.Info.WorkingDirectory);
-                break;
-            case GitRepositoryAction.Move:
-                action = repository => MoveAsync(repository.Info.WorkingDirectory, flags.TargetDirectory, repository.GetRepositoryName());
-                break;
-            default:
-                throw new ArgumentException("Invalid action");
-        }
+            GitRepositoryAction.Archive => repository => ArchiveAsync(repository.Info.WorkingDirectory,
+                flags.TargetDirectory, repository.GetRepositoryName()),
+            GitRepositoryAction.Delete => repository => DeleteAsync(repository.Info.WorkingDirectory),
+            GitRepositoryAction.Move => repository => MoveAsync(repository.Info.WorkingDirectory, flags.TargetDirectory,
+                repository.GetRepositoryName()),
+            _ => throw new ArgumentException("Invalid action")
+        };
 
-        var tasks = repositories.Select(repo => action(repo)).ToList();
+        var tasks = repositories.Select(repo => action(repo));
 
         await Task.WhenAll(tasks);
     }
@@ -40,32 +33,29 @@ public class GitRepositoryHandler : IGitRepositoryHandler
         {
             // Create a .zip at the source directory
             var zipPath = Path.Combine(workingDir, zipFileName);
-            if (File.Exists(zipPath)) File.Delete(zipPath);
+            File.Delete(zipPath);
             ZipFile.CreateFromDirectory(workingDir, zipPath);
 
             // Move the .zip file to the target directory
             var movedZipPath = Path.Combine(targetDirectory, zipFileName);
-            if (File.Exists(movedZipPath)) File.Delete(movedZipPath);
+            File.Delete(movedZipPath);
             File.Move(zipPath, movedZipPath);
 
             // Deletes the current (working) directory
-            if (Directory.Exists(workingDir)) Directory.Delete(workingDir, true);
+            Directory.Delete(workingDir, true);
         });
     }
 
     public async Task DeleteAsync(string workingDir)
     {
         await Task.Run(() =>
-            {
-                if (Directory.Exists(workingDir))
-                    Directory.Delete(workingDir, true);
-                else
-                    throw new NotFoundException($"Location: {workingDir} Does not exist.");
+            { 
+                Directory.Delete(workingDir, true);
             }
         );
     }
 
-    public async Task MoveAsync(string workingDir, string? targetDir, string dirName)
+    public async Task MoveAsync(string workingDir, string targetDir, string dirName)
     {
         await Task.Run(() =>
         {
