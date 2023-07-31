@@ -14,7 +14,7 @@ public class GitRepositoryScanner : IGitRepositoryScanner
         _logger = logger;
     }
 
-    public async Task<IList<Repository>> ScanForRepositoriesAsync(string path, string? owner)
+    public async Task<IList<Repository>?> ScanForRepositoriesAsync(string path, string? owner)
     {
         _logger.LogInformation("Starting directory scan...");
 

@@ -3,6 +3,7 @@ using GitJanitor.Common.Enums;
 using GitJanitor.Common.Models;
 using GitJanitor.Core.Interfaces;
 using GitJanitor.IO.Interfaces;
+using LibGit2Sharp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -15,7 +16,7 @@ public class CommandBuilder
         // Create flag options
         var workingDirOption = new Option<string>(
             new[] { "--path", "-p" },
-            "The workingDir to scan for Git repositories.");
+            "The working directory to scan for Git repositories.");
 
         var actionOption = new Option<GitRepositoryAction>(
             new[] { "--action", "-a" },
@@ -46,6 +47,8 @@ public class CommandBuilder
                 var dirScanner = services.GetRequiredService<IGitRepositoryScanner>();
                 var dirHandler = services.GetRequiredService<IGitRepositoryHandler>();
 
+                var logger = services.GetRequiredService<ILogger<Program>>();
+
                 // Bind the rootCommands to the CommandLineFlags model and apply some validation on it
                 var flags = new CommandLineFlags
                 {
@@ -58,10 +61,17 @@ public class CommandBuilder
                 var repositories =
                     await dirScanner.ScanForRepositoriesAsync(flags.WorkingDirectory, flags.Owner);
 
-                await dirHandler.HandleAsync(repositories, flags);
+                if (repositories == null || !repositories.Any())
+                {
+                    logger.LogWarning("Directory not found, exiting...");
+                }
+                else
+                {
+                    await dirHandler.HandleAsync(repositories, flags);
+                    logger.LogInformation("Done processing files, please check output in the desired folder.");
+                }
             },
             workingDirOption, actionOption, ownerOption, targetDirOption);
-
         return rootCommand;
     }
 }
