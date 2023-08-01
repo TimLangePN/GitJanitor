@@ -14,7 +14,7 @@ public class GitRepositoryOwnerHandler
         // Add other platforms as needed
     };
 
-    public static string? Getowner(string path, string ownerInput)
+    public static string? GetOwner(string path, string ownerInput)
     {
         using var repo = new Repository(path);
 
@@ -26,7 +26,7 @@ public class GitRepositoryOwnerHandler
 
         foreach (var platform in _platforms)
         {
-            if (url.Contains(platform.Value))
+            if (url.Contains(platform.Key, StringComparison.Ordinal))
             {
                 var match = Regex.Match(url, platform.Value);
                 if (match.Success) return match.Groups[1].Value;

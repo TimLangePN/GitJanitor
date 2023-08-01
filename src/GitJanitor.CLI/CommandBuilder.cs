@@ -15,15 +15,24 @@ public class CommandBuilder
         // Create flag options
         var workingDirOption = new Option<string>(
             new[] { "--path", "-p" },
-            "The working directory to scan for Git repositories.");
+            "The working directory to scan for Git repositories.")
+        {
+            IsRequired = true
+        };
 
         var actionOption = new Option<GitRepositoryAction>(
             new[] { "--action", "-a" },
-            "The action to perform on the found repositories.");
+            "The action to perform on the found repositories.")
+        {
+            IsRequired = true
+        };
 
         var ownerOption = new Option<string>(
             new[] { "--owner", "-o" },
-            "The GitHub owner to filter repositories by.");
+            "The GitHub owner to filter repositories by.")
+        {
+            IsRequired = true
+        };
 
         var targetDirOption = new Option<string>(
             new[] { "--target", "-t" },
