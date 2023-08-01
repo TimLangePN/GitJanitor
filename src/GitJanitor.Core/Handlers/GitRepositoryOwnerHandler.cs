@@ -1,11 +1,12 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
 using LibGit2Sharp;
 
 namespace GitJanitor.Core.Handlers;
 
 public class GitRepositoryOwnerHandler
 {
-    private static readonly Dictionary<string, string> Platforms = new()
+    private static readonly IReadOnlyDictionary<string, string> _platforms = new Dictionary<string, string>()
     {
         { "github.com", @"github\.com[:/](.+?)/" },
         { "bitbucket.org", @"bitbucket\.org[:/](.+?)/" },
@@ -23,9 +24,9 @@ public class GitRepositoryOwnerHandler
         // Get the URL
         var url = remote.Url;
 
-        foreach (var platform in Platforms)
+        foreach (var platform in _platforms)
         {
-            if (url.Contains(platform.Key))
+            if (url.Contains(platform.Value))
             {
                 var match = Regex.Match(url, platform.Value);
                 if (match.Success) return match.Groups[1].Value;

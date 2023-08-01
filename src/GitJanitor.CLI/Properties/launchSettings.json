@@ -2,7 +2,7 @@
   "profiles": {
     "GitJanitor.CLI": {
       "commandName": "Project",
-      "commandLineArgs": "--action Move\r\n--path C:\\projects\\test\r\n--owner test\r\n--target C:\\Users\\test\\Desktop"
+      "commandLineArgs": "--action Move\r\n--path C:\\projects\\test\r\n--owner test\r\n--target C:\\Users\\Draug\\Desktop"
     }
   }
 }
