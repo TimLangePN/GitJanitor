@@ -18,43 +18,49 @@ public class GitRepositoryScanner : IGitRepositoryScanner
     {
         _logger.LogInformation("Starting directory scan...");
 
-        // Check if the directory exists before starting the search.
         if (Directory.Exists(path))
         {
             if (owner != null)
-                return await ScanDirectoryRecursivelyAsync(new DirectoryInfo(path), owner);
+            {
+                var gitRepositories = new List<Repository>();
+                await ScanDirectoryRecursivelyAsync(new DirectoryInfo(path), owner, gitRepositories);
+                return gitRepositories;
+            }
         }
 
         return default;
     }
 
-    private async Task<IList<Repository>> ScanDirectoryRecursivelyAsync(DirectoryInfo directory,
-        string owner)
+    private async Task ScanDirectoryRecursivelyAsync(DirectoryInfo directory, string owner, List<Repository> gitRepositories)
     {
-        var gitRepositories = new List<Repository>();
         var repositoryName = directory.FullName;
 
         try
         {
-            foreach(var subDirectory in directory.EnumerateDirectories())
+            foreach (var subDirectory in directory.EnumerateDirectories())
+            {
                 if (subDirectory.Name == ".git")
+                {
                     try
                     {
                         var repository = new Repository(repositoryName);
-                        var repositoryOwner =
-                            GitRepositoryOwnerHandler.Getowner(repositoryName, owner);
+                        var repositoryOwner = GitRepositoryOwnerHandler.GetOwner(repositoryName, owner);
 
                         if (string.Equals(repositoryOwner, owner, StringComparison.OrdinalIgnoreCase))
+                        {
                             gitRepositories.Add(repository);
+                        }
                     }
                     catch (Exception ex)
                     {
                         _logger.LogWarning($"Exception occurred while trying to scan for directories: {ex.Message}");
                     }
-                // This directory is a Git repository, add it to the list.
+                }
                 else
-                    // This directory is not a Git repository, search its subdirectories.
-                    await ScanDirectoryRecursivelyAsync(subDirectory, owner);
+                {
+                    await ScanDirectoryRecursivelyAsync(subDirectory, owner, gitRepositories);
+                }
+            }
         }
         catch (UnauthorizedAccessException uae)
         {
@@ -66,7 +72,5 @@ public class GitRepositoryScanner : IGitRepositoryScanner
             _logger.LogError(
                 $"An error occurred while processing directory: {directory.FullName}. Exception: {ex.Message}");
         }
-
-        return gitRepositories;
     }
 }

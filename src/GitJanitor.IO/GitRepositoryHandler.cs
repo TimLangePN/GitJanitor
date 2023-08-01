@@ -10,6 +10,13 @@ namespace GitJanitor.IO;
 
 public class GitRepositoryHandler : IGitRepositoryHandler
 {
+    private readonly ILogger<GitRepositoryHandler> _logger;
+
+    public GitRepositoryHandler(ILogger<GitRepositoryHandler> logger)
+    {
+        _logger = logger;
+    }
+
     public async Task HandleAsync(IList<Repository> repositories, CommandLineFlags flags)
     {
         Func<Repository, Task> action = flags.Action switch
@@ -45,6 +52,7 @@ public class GitRepositoryHandler : IGitRepositoryHandler
 
                 // Deletes the current (working) directory
                 Directory.Delete(workingDirectory, true);
+                _logger.LogInformation($"Moved {zipFileName}.zip to destination at: {targetDirectory}.");
             }
         });
     }
@@ -54,6 +62,7 @@ public class GitRepositoryHandler : IGitRepositoryHandler
         await Task.Run(() =>
             { 
                 Directory.Delete(workingDirectory, true);
+                _logger.LogInformation($"Deleted folder: {workingDirectory}");
             }
         );
     }
@@ -69,6 +78,7 @@ public class GitRepositoryHandler : IGitRepositoryHandler
                     Console.WriteLine("Target directory already exists: " + targetPath);
                 else
                     Directory.Move(workingDirectory, targetPath);
+                    _logger.LogInformation($"Moved {directoryName} to: {targetDirectory}.");
             }
             else
             {
